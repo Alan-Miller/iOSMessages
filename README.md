@@ -10,6 +10,7 @@ Notes
 * Files are overwritten without checking to see if one already exists. 
 * If you get an error about the DateTime module, please see this CPAN article on installing modules: http://www.cpan.org/modules/INSTALL.html
 * This does not support group texts. It just adds the text sent from a user to that user's thread with you. This is basically a bug, but I haven't figured out how to do group texts yet. 
+* If you're getting an "file is encrypted or is not a database" error, make sure you've disabled the "Encrypt iPhone backup" checkbox under the "Backup" settings panel in iTunes.
 
 Basic steps: 
 
