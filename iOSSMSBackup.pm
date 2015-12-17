@@ -1,5 +1,8 @@
 package iOSSMSBackup;
 
+use v5.10;
+
+
 use DBI;
 use File::Copy;
 use DateTime;
@@ -18,11 +21,11 @@ sub new
         _sms_db => undef,
         _attachments => {}
     };
-    
+
     unless (-d $self->{_backup_directory}){
         die 'Directory does not exist';
     }
-    
+
     bless $self, $class;
     return $self;
 }
@@ -30,7 +33,7 @@ sub new
 
 sub export_messages {
     my ($self) = @_;
-  
+
     mkdir "_export" unless -d "_export";
 
     $self->_create_css_file();
@@ -41,20 +44,20 @@ sub export_messages {
     my $contact_list = iOSContacts->new({backup_directory => $self->{_backup_directory}});
     my $contacts = $contact_list->get_contacts();
     foreach my $number (keys %$messages){
-        #print "Exporting messages for $number\n";
-	    
-        mkdir "_export/$number" unless -d "$export_d/$number";
+        mkdir "_export/$contacts->{$number}->{'first_name'}_$contacts->{$number}->{'last_name'}-$number" unless -d "$export_d/$contacts->{$number}->{'first_name'}_$contacts->{$number}->{'last_name'}-$number";
 
         foreach my $date (keys %{$messages->{$number}}){
-            $self->create_html_file_for($number, $date, $messages->{$number}->{$date}, $contacts->{$number});
+            $self->create_html_file_for($number, $date, $messages->{$number}->{$date}, $contacts);
         }
     }
     return 1;
 }
 
 sub create_html_file_for{
-    my ($self, $number, $date, $texts, $contact_info) = @_;
-    open OUTFILE, ">_export/$number/$date.html";
+    my ($self, $number, $date, $texts, $contacts) = @_;
+    my $contact_info = $contacts->{$number};
+
+    open OUTFILE, ">_export/$contact_info->{'first_name'}_$contact_info->{'last_name'}-$number/$date.html";
     print OUTFILE $self->html_header();
     
     my $title = qq|<div class="title_header">|;
@@ -63,25 +66,39 @@ sub create_html_file_for{
     } else {
         $title .= $number;
     }
+
     $title .= " on ";    
     my $dateTime = DateTime->from_epoch(epoch=>$texts->[0]->{'Epoch'});
     $title .= $dateTime->day_name() .", ". $dateTime->month_name() . " " . $dateTime->day() . ", " . $dateTime->year();
     $title .= qq|</div>|;
     print OUTFILE $title;
     print OUTFILE qq|<div class="texts">|;
-    print OUTFILE $self->html_texts($texts);
+    print OUTFILE $self->html_texts($texts, $contacts);
     print OUTFILE qq|</div>|;
     print OUTFILE $self->html_footer();
     close OUTFILE;
 }
 
 sub html_texts{
-    my ($self, $texts) = @_;
+    my ($self, $texts, $contacts) = @_;
     my $html = "";
 
     foreach my $text (@$texts){
+        my $contact_info = $contacts->{$text->{'UniqueID'}};
+        my $sender;
+        if ($text->{'IsGroup'}) {
+            if ($contact_info and $contact_info->{'first_name'}) {
+                $sender = $contact_info->{'first_name'}. " " . $contact_info->{'last_name'};
+            } elsif ($text->{'Type'} eq "sent") {
+                say "you sent a group message";
+                $sender = "You";
+            } else {
+                $sender = $text->{'UniqueID'};
+            }
+        }
         $html .= qq|<div id="|.$text->{'RowID'}.qq|" class="|.$text->{'Type'}.qq|">|;
         $html .= qq|<div class="time">|.$text->{'Time'}.qq|</div>|;
+        $html .= qq|<div class="name">|.$sender.qq|</div>| if $text->{'IsGroup'};
         $html .= qq|<div class="text">|.$text->{'Text'} . qq|</div>|;
         $html .= $self->_process_mms($text) if $text->{'AttachmentID'};
         $html .= "</div>\n";
@@ -93,8 +110,15 @@ sub _process_mms {
     my ($self, $text) = @_;
     my $attachmentID = $text->{'AttachmentID'};
     my $date = $text->{'Date'};
-    my $number = $text->{'UniqueID'};
-    my $directory = "_export/$number/$date";
+    my $number;
+    if ($text->{'GroupName'}) {
+        $number = $text->{'GroupName'};
+    } else {
+        $number = $text->{'UniqueID'};
+    }
+    my $contact_list = iOSContacts->new({backup_directory => $self->{_backup_directory}});
+    my $contacts = $contact_list->get_contacts();
+    my $directory = "_export/$contacts->{$number}->{'first_name'}_$contacts->{$number}->{'last_name'}-$number/$date";
     mkdir $directory unless -d $directory;
     my $html = "";
     if ((defined $self->{_attachments}->{$attachmentID}) && (my $attachment = $self->{_attachments}->{$attachmentID})){
@@ -143,7 +167,7 @@ sub export_texts_for_number_and_date {
     my ($self, $texts, $number, $date) = @_;
     
     $number = $self->format_number($number);
-    my $directory = "$export_d/$number";
+    my $directory = "$export_d/$contacts->{$number}->{'first_name'}_$contacts->{$number}->{'last_name'}-$number";
     mkdir $directory unless -d $directory;
     
     open OUTFILE, ">$directory/$date.html";
@@ -153,7 +177,7 @@ sub export_texts_for_number_and_date {
     print OUTFILE qq|\n<div class="text_block">|;
     foreach my $text (@$texts){
         print OUTFILE qq|\n\t<div class="$text->{Type} text"><span class="rowid">$text->{RowID}</span>|;
-    	print OUTFILE qq|<span class="time">$text->{Date}:</span><span class="message">$text->{Text}|;
+        print OUTFILE qq|<span class="time">$text->{Date}:</span><span class="message">$text->{Text}|;
         if ($text->{attachment_id}) {
             print OUTFILE $self->process_mms($text->{attachment_id}, $number, $date) if $text->{attachment_id};
         }
@@ -170,7 +194,7 @@ sub _create_css_file{
     if (!(-e "_export/style.css")){
         if (-e $css_file){
             copy($css_file, "_export/style.css");
-        }else{
+        } else {
             open OUTFILE, ">_export/style.css";
             print OUTFILE ".received {background-color:purple;}\n.sent{background-color:gray}";
             close OUTFILE;

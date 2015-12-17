@@ -1,4 +1,8 @@
 package iOSMessages;
+use v5.10;
+
+use strict;
+use warnings;
 
 use DBI;
 use Data::Dumper;
@@ -56,50 +60,95 @@ sub _generate_messages_hash {
 
     my $dbh = $self->_db;
     my $query = qq|        
-        SELECT 
+        SELECT
             m.rowid as RowID,
-            h.id AS UniqueID, 
-            CASE is_from_me 
-                WHEN 0 THEN "received" 
-                WHEN 1 THEN "sent" 
-                ELSE "Unknown" 
-            END as Type, 
-            CASE 
+            h.id AS UniqueID,
+            CASE is_from_me
+                WHEN 0 THEN "received"
+                WHEN 1 THEN "sent"
+                ELSE "Unknown"
+            END as Type,
+            CASE
                 WHEN date > 0 then TIME(date + 978307200, 'unixepoch', 'localtime')
                 ELSE NULL
             END as Time,
-            CASE 
+            CASE
                 WHEN date > 0 THEN strftime('%Y%m%d', date + 978307200, 'unixepoch', 'localtime')
                 ELSE NULL
-            END as Date, 
-            CASE 
+            END as Date,
+            CASE
                 WHEN date > 0 THEN date + 978307200
                 ELSE NULL
-            END as Epoch, 
+            END as Epoch,
             text as Text,
             maj.attachment_id AS AttachmentID
         FROM message m
         LEFT JOIN handle h ON h.rowid = m.handle_id
         LEFT JOIN message_attachment_join maj
         ON maj.message_id = m.rowid
+        WHERE m.cache_roomnames IS NULL
         ORDER BY UniqueID, Date, Time|;
     my $sth = $dbh->prepare($query);
     $sth->execute();
-    
+
     my $tempMessages = {};
-    
+
     while (my $text = $sth->fetchrow_hashref){
         if (my $uniqueID = $text->{'UniqueID'}) {
             my $uniqueID = $text->{'UniqueID'};
-            if ($date = $text->{'Date'}) {
+            if (my $date = $text->{'Date'}){
                 push @{$tempMessages->{$uniqueID}->{$date}}, $text;
             }
-            
             if ($text->{'AttachmentID'}) {
                 $self->_process_mms($text->{'AttachmentID'});
             }
-            
         }
+    }
+    $query = qq|
+        SELECT
+            m.rowid as RowID,
+            h.id AS UniqueID,
+            CASE is_from_me
+                WHEN 0 THEN "received"
+                WHEN 1 THEN "sent"
+                ELSE "Unknown"
+            END as Type,
+            CASE
+                WHEN date > 0 then TIME(date + 978307200, 'unixepoch', 'localtime')
+                ELSE NULL
+            END as Time,
+            CASE
+                WHEN date > 0 THEN strftime('%Y%m%d', date + 978307200, 'unixepoch', 'localtime')
+                ELSE NULL
+            END as Date,
+            CASE
+                WHEN date > 0 THEN date + 978307200
+                ELSE NULL
+            END as Epoch,
+            text as Text,
+            maj.attachment_id AS AttachmentID,
+            m.cache_roomnames AS GroupName
+        FROM message m
+        LEFT JOIN handle h ON h.rowid = m.handle_id
+        LEFT JOIN message_attachment_join maj
+        ON maj.message_id = m.rowid
+        WHERE m.cache_roomnames NOT NULL
+        ORDER BY Date, Time|;
+    $sth = $dbh->prepare($query);
+    $sth->execute();
+    while (my $text = $sth->fetchrow_hashref) {
+        my $groupName = $text->{'GroupName'};
+        $text->{'IsGroup'} = 1;
+        if (my $date = $text->{'Date'}) {
+            if ($text->{'Type'} eq "sent") {
+                say "group message from me";
+            }
+            push @{$tempMessages->{$groupName}->{$date}}, $text;
+        }
+        if ($text->{'AttachmentID'}) {
+            $self->_process_mms($text->{'AttachmentID'});
+        }
+
     }
     $self->{_messages} = $tempMessages;
 }
@@ -125,5 +174,15 @@ sub _process_mms {
     };
 }
 
+sub _process_group {
+    my ($self, $group_name) = @_;
 
+    my $dbh = $self->{_sms_db};
+    my $query = qq|
+        SELECT
+
+        FROM chat c
+        LEFT JOIN|;
+
+}
 1;
