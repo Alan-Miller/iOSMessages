@@ -14,7 +14,7 @@ sub new
     my ($class, $params) = @_;
     my $self = {
         _backup_directory => $params->{backup_directory},
-        _sms_db_filename => '3d0d7e5fb2ce288813306e4d4636395e047a3d28',
+        _sms_db_filename => '3d/3d0d7e5fb2ce288813306e4d4636395e047a3d28',
         _sms_db => undef,
         _messages => {},
         _attachments => {}
@@ -167,6 +167,7 @@ sub _process_mms {
     $filepath =~ s#^~/#MediaDomain-#;
     
     my $sha1_filename = sha1_hex($filepath);
+    my $sha1_filename = substr($sha1_filename, 0, 2) . '/' . $sha1_filename;
     $self->{_attachments}->{$attachment_id} = {
         sha1_filename => $sha1_filename, 
         filename => $filename, 
