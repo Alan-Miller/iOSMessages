@@ -133,6 +133,7 @@ sub _process_mms {
           $attachment->{'filename'} = $name.$suffix.".".$extension;
         }
         copy($self->{_backup_directory}.$attachment->{'sha1_filename'}, $directory."/".$attachment->{'filename'}) or "Copy failed for file ".$self->{_backup_directory}.$attachment->{'sha1_filename'}."\n";
+        utime $attachment->{'created_date'}, $attachment->{'created_date'}, $directory."/".$attachment->{'filename'};
         if ($attachment->{'mime_type'} =~ /^image/) {
             $html = qq|<img src="|."$date/".$attachment->{'filename'}.qq|"/>|;
         } elsif ($attachment->{'mime_type'} =~ /^video/) {

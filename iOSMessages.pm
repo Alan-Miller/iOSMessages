@@ -165,13 +165,15 @@ sub _process_mms {
     my $filepath = $attachment->{filename};
     (my $filename = $filepath) =~ s{(.*)/(.*)}{$2}xms;
     $filepath =~ s#^~/#MediaDomain-#;
+    my $created_date = $attachment->{created_date} + 978307200;
     
     my $sha1_filename = sha1_hex($filepath);
-    my $sha1_filename = substr($sha1_filename, 0, 2) . '/' . $sha1_filename;
+    $sha1_filename = substr($sha1_filename, 0, 2) . '/' . $sha1_filename;
     $self->{_attachments}->{$attachment_id} = {
         sha1_filename => $sha1_filename, 
         filename => $filename, 
-        mime_type => $attachment->{mime_type}
+        mime_type => $attachment->{mime_type},
+        created_date => $created_date
     };
 }
 
