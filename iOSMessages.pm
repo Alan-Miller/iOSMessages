@@ -6,59 +6,52 @@ use warnings;
 
 use DBI;
 use Data::Dumper;
-use Digest::SHA1  qw(sha1 sha1_hex sha1_base64);
+use Digest::SHA1 qw(sha1 sha1_hex sha1_base64);
 
-
-sub new
-{
+sub new {
     my ($class, $params) = @_;
     my $self = {
         _backup_directory => $params->{backup_directory},
-        _sms_db_filename => '3d/3d0d7e5fb2ce288813306e4d4636395e047a3d28',
-        _sms_db => undef,
-        _messages => {},
-        _attachments => {}
+        _sms_db_filename  => '3d/3d0d7e5fb2ce288813306e4d4636395e047a3d28',
+        _sms_db           => undef,
+        _messages         => {},
+        _attachments      => {}
     };
 
-    unless (-d $self->{_backup_directory}){
+    unless (-d $self->{_backup_directory}) {
         print "direcotry " . $self->{_backup_directory} . "\n";
         die 'Directory does not exist';
     }
-    
+
     bless $self, $class;
     $self->_generate_messages_hash();
     return $self;
 }
 
-sub get_messages{
+sub get_messages {
     my ($self) = @_;
     return $self->{_messages};
 }
 
-sub get_attachments{
+sub get_attachments {
     my ($self) = @_;
     return $self->{_attachments};
 }
 
-# Internal methods 
+# Internal methods
 sub _db {
     my ($self) = @_;
 
     return $self->{_sms_db} if ($self->{_sms_db});
 
-    $self->{_sms_db} = DBI->connect( 
-        "dbi:SQLite:dbname=".$self->{_backup_directory}.$self->{_sms_db_filename}, 
-        "",                          
-        "",                          
-        { RaiseError => 1 },         
-    ) or die $DBI::errstr;
+    $self->{_sms_db} = DBI->connect("dbi:SQLite:dbname=" . $self->{_backup_directory} . $self->{_sms_db_filename}, "", "", { RaiseError => 1 },) or die $DBI::errstr;
     return $self->{_sms_db};
 }
 
 sub _generate_messages_hash {
     my ($self) = @_;
 
-    my $dbh = $self->_db;
+    my $dbh   = $self->_db;
     my $query = qq|        
         SELECT
             m.rowid as RowID,
@@ -93,11 +86,11 @@ sub _generate_messages_hash {
 
     my $tempMessages = {};
 
-    while (my $text = $sth->fetchrow_hashref){
+    while (my $text = $sth->fetchrow_hashref) {
         if (my $uniqueID = $text->{'UniqueID'}) {
             my $uniqueID = $text->{'UniqueID'};
-            if (my $date = $text->{'Date'}){
-                push @{$tempMessages->{$uniqueID}->{$date}}, $text;
+            if (my $date = $text->{'Date'}) {
+                push @{ $tempMessages->{$uniqueID}->{$date} }, $text;
             }
             if ($text->{'AttachmentID'}) {
                 $self->_process_mms($text->{'AttachmentID'});
@@ -143,7 +136,7 @@ sub _generate_messages_hash {
             if ($text->{'Type'} eq "sent") {
                 say "group message from me";
             }
-            push @{$tempMessages->{$groupName}->{$date}}, $text;
+            push @{ $tempMessages->{$groupName}->{$date} }, $text;
         }
         if ($text->{'AttachmentID'}) {
             $self->_process_mms($text->{'AttachmentID'});
@@ -155,32 +148,32 @@ sub _generate_messages_hash {
 
 sub _process_mms {
     my ($self, $attachment_id) = @_;
-    
-    my $dbh = $self->{_sms_db};
+
+    my $dbh   = $self->{_sms_db};
     my $query = qq|SELECT * FROM attachment WHERE ROWID = ?|;
-    my $sth = $dbh->prepare($query);
+    my $sth   = $dbh->prepare($query);
     $sth->execute($attachment_id);
-    
+
     my $attachment = $sth->fetchrow_hashref();
-    my $filepath = $attachment->{filename};
+    my $filepath   = $attachment->{filename};
     (my $filename = $filepath) =~ s{(.*)/(.*)}{$2}xms;
     $filepath =~ s#^~/#MediaDomain-#;
     my $created_date = $attachment->{created_date} + 978307200;
-    
+
     my $sha1_filename = sha1_hex($filepath);
     $sha1_filename = substr($sha1_filename, 0, 2) . '/' . $sha1_filename;
     $self->{_attachments}->{$attachment_id} = {
-        sha1_filename => $sha1_filename, 
-        filename => $filename, 
-        mime_type => $attachment->{mime_type},
-        created_date => $created_date
+        sha1_filename => $sha1_filename,
+        filename      => $filename,
+        mime_type     => $attachment->{mime_type},
+        created_date  => $created_date
     };
 }
 
 sub _process_group {
     my ($self, $group_name) = @_;
 
-    my $dbh = $self->{_sms_db};
+    my $dbh   = $self->{_sms_db};
     my $query = qq|
         SELECT
 
