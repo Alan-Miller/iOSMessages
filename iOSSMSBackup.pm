@@ -57,7 +57,8 @@ sub create_html_file_for{
     my ($self, $number, $date, $texts, $contacts) = @_;
     my $contact_info = $contacts->{$number};
 
-    open OUTFILE, ">_export/$contact_info->{'first_name'}_$contact_info->{'last_name'}-$number/$date.html";
+    my $filename = "_export/$contact_info->{'first_name'}_$contact_info->{'last_name'}-$number/$date.html";
+    open OUTFILE, ">$filename";
     print OUTFILE $self->html_header();
     
     my $title = qq|<div class="title_header">|;
@@ -69,7 +70,9 @@ sub create_html_file_for{
 
     $title .= " on ";    
     my $dateTime = DateTime->from_epoch(epoch=>$texts->[0]->{'Epoch'});
-    $title .= $dateTime->day_name() .", ". $dateTime->month_name() . " " . $dateTime->day() . ", " . $dateTime->year();
+    my $tzname = DateTime::TimeZone->new( name => 'local' )->name();
+    $dateTime->set_time_zone($tzname);
+    $title .= $dateTime->day_name() . ", " . $dateTime->month_name() . " " . $dateTime->day() . ", " . $dateTime->year();
     $title .= qq|</div>|;
     print OUTFILE $title;
     print OUTFILE qq|<div class="texts">|;
@@ -77,6 +80,7 @@ sub create_html_file_for{
     print OUTFILE qq|</div>|;
     print OUTFILE $self->html_footer();
     close OUTFILE;
+    utime $texts->[0]->{'Epoch'}, $texts->[0]->{'Epoch'}, $filename;
 }
 
 sub html_texts{
@@ -180,8 +184,9 @@ sub export_texts_for_number_and_date {
     $number = $self->format_number($number);
     my $directory = "$export_d/$contacts->{$number}->{'first_name'}_$contacts->{$number}->{'last_name'}-$number";
     mkdir $directory unless -d $directory;
-    
-    open OUTFILE, ">$directory/$date.html";
+
+    my $filename = "$direcotry/$date.html";
+    open OUTFILE, ">$filename";
     print OUTFILE $self->html_header;
     print OUTFILE qq|<div class="content">|;
     print OUTFILE $self->print_title(scalar(@$texts), $number, $date);
@@ -197,6 +202,7 @@ sub export_texts_for_number_and_date {
     print OUTFILE qq|</div></div>\n|;
     print OUTFILE $self->html_footer;
     close OUTFILE;
+    utime $date, $date, $filename;
 }
 
 sub _create_css_file{
