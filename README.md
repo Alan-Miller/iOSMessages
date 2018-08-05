@@ -34,4 +34,6 @@ Basic steps:
     ```
     
 
-> After finishing the steps above successfully, a folder called `_export` will be created in your working directory with all of your files.
+> After finishing these steps, an `_export` folder with all your files will be created in the iOSBackup folder.
+
+> My thanks to [Chelsey Baker](https://github.com/chelseybaker) for [her original repo](https://github.com/chelseybaker/iOSMessageExport).
