@@ -90,9 +90,9 @@ sub html_texts {
         if ($text->{'IsGroup'}) {
             if ($contact_info and $contact_info->{'first_name'}) {
                 $sender = $contact_info->{'first_name'} . " " . $contact_info->{'last_name'};
-            } elsif ($text->{'Type'} eq "sent") {
-                say "you sent a group message";
-                $sender = "You";
+            # } elsif ($text->{'Type'} eq "sent") {
+            #     say "you sent a group message";
+            #     $sender = "You";
             } else {
                 $sender = $text->{'UniqueID'};
             }

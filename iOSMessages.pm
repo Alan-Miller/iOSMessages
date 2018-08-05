@@ -19,7 +19,7 @@ sub new {
     };
 
     unless (-d $self->{_backup_directory}) {
-        print "direcotry " . $self->{_backup_directory} . "\n";
+        print "directory " . $self->{_backup_directory} . "\n";
         die 'Directory does not exist';
     }
 
@@ -133,9 +133,9 @@ sub _generate_messages_hash {
         my $groupName = $text->{'GroupName'};
         $text->{'IsGroup'} = 1;
         if (my $date = $text->{'Date'}) {
-            if ($text->{'Type'} eq "sent") {
-                say "group message from me";
-            }
+            # if ($text->{'Type'} eq "sent") {
+            #     say "group message from me";
+            # }
             push @{ $tempMessages->{$groupName}->{$date} }, $text;
         }
         if ($text->{'AttachmentID'}) {
@@ -176,7 +176,6 @@ sub _process_group {
     my $dbh   = $self->{_sms_db};
     my $query = qq|
         SELECT
-
         FROM chat c
         LEFT JOIN|;
 
