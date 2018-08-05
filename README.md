@@ -1,15 +1,13 @@
 iOSMessageExport
 ================
 
-Notes
+### Notes
 
-* Emojis only show up when viewing pages in Safari.
-* Images and videos are visible within the message threads, but all other content is linked.
 * Files are overwritten without checking to see if one already exists.
 * If you get an error about the DateTime module, see this CPAN article on installing modules: http://www.cpan.org/modules/INSTALL.html
-* If you're getting a `file is encrypted or is not a database` error, make sure you've disabled the "Encrypt iPhone backup" checkbox under the "Backup" settings panel in iTunes.
+* If you're getting a `file is encrypted or is not a database` error, make sure you have disabled the "Encrypt iPhone backup" checkbox under the "Backup" settings panel in iTunes.
 
-Basic steps:
+### Basic steps: 
 
 1. Make an iOSBackup directory on the Desktop
     ```
