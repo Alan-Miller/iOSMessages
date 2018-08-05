@@ -3,31 +3,35 @@ iOSMessageExport
 
 Notes
 
-* Emojis would only show up when viewing the pages in Safari.
+* Emojis only show up when viewing pages in Safari.
 * Images and videos are visible within the message threads, but all other content is linked.
 * Files are overwritten without checking to see if one already exists.
-* If you get an error about the DateTime module, please see this CPAN article on installing modules: http://www.cpan.org/modules/INSTALL.html
-* If you're getting an "file is encrypted or is not a database" error, make sure you've disabled the "Encrypt iPhone backup" checkbox under the "Backup" settings panel in iTunes.
+* If you get an error about the DateTime module, see this CPAN article on installing modules: http://www.cpan.org/modules/INSTALL.html
+* If you're getting a `file is encrypted or is not a database` error, make sure you've disabled the "Encrypt iPhone backup" checkbox under the "Backup" settings panel in iTunes.
 
 Basic steps:
 
-1. Make a directory somewhere
+1. Make an iOSBackup directory on the Desktop
     ```
     mkdir ~/Desktop/iOSBackup
     ```
-2. Add this repository to your ~/Desktop/iOSBackup directory
+1. Move or copy your iTunes backup folder into this new folder. 
+
+1. Clone iOSMessageExport repository to the new folder.
     ```
     cd ~/Desktop/iOSBackup
 
     git clone git@github.com:junkblocker/iOSMessageExport.git
     ```
-3. I recommend copying your iTunes backup into your ~/Desktop/iOSBackup folder, just in case something bad happens (as I am not responsible for your misfortunes). Run backup.pl passing the backup directory.
-    ```
-    perl iOSMessageExport/backup.pl --directory_path 9b9f73759fad7b31e330dd26bf7f745acccf1869/
-    ```
-    If you see an error that iOSSMSBackup cannot be found, you may need to run
+
+1. This step may not be needed, but if you skip it and try the final step and you see an error that `iOSSMSBackup` cannot be found, you may need to run the command below. 
     ```
     export PERL5LIB=iOSMessageExport/
     ```
+1. Run `backup.pl`, passing in the name of your iTunes backup folder (it will be a long string of letters and numbers such as `9b9f73759fad7b31e330dd26bf7f745acccf1869`). Make sure to include the forward slash (`/`) after the folder name.
+    ```
+    perl iOSMessageExport/backup.pl --directory_path <your_ios_backup_folder_name_here>/
+    ```
+    
 
-4. An _export folder will be created in your working directory with all of your files!
+> After finishing the steps above successfully, a folder called `_export` will be created in your working directory with all of your files.
