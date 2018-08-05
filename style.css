@@ -1,10 +1,98 @@
-div {border:2px solid;border-color:transparent;
-border-radius:25px;}
-video {max-width:90%;}
-img {max-width:90%; max-height:90%;}
-.title_header{font-size:24px;padding:10px;}
-.received{margin-bottom:10px;background-color:#dddddd; text-align:left; margin-right:40px;padding-left:10px;padding-right:10px;}
-.sent{margin-bottom:10px;margin-left:40px;text-align:right;background-color:#66CCCC;padding-left:10px;padding-right:10px;}
-.content{width:85%;margin:auto; min-width:600px;}
-.texts{width:50%; margin:auto;}
+@import 'https://fonts.googleapis.com/css?family=Open+Sans:300|Roboto';
 
+html {
+	width: 382px;
+	min-height: 100vh;
+	margin: 0 auto 0 auto;
+	font-family: 'Open Sans', sans-serif;
+	background: white;
+	border-left: 1px dotted #bbbbbb;
+	border-right: 1px dotted #bbbbbb;
+	position: relative;
+	padding: 12px 0 6px 0;
+}
+
+.title_header {
+	color: #bbbbbb;
+	font-size: 1em;
+	position: relative;
+	left: 50%;
+	transform: translateX(-50%);
+	display: inline-block;
+	text-align: center;
+	margin-top: 24px;
+	float: left;
+	clear: both;
+}
+
+.time {
+	font-size: .7em;
+	color: #bbbbbb;
+	position: absolute;
+	right: -77px;
+	transform: translateY(4px);
+}
+.sent > .time {
+	position: absolute;
+	right: 300px;
+}
+
+.received, .sent {
+	max-width: 70%;
+	background-color: #dddddd;
+	color: black;
+	font-size: 1.2em;
+	text-align: left;
+	margin: 12px 24px;
+	padding: 8px 16px;
+	-webkit-border-radius: 30px;
+		 -moz-border-radius: 30px;
+	 				border-radius: 24px;
+
+	display: block;
+	float: left;
+	clear: both;
+	position: relative;
+}
+.sent {
+	float: right;
+	background-color: #007AFF;
+	color: white;
+}
+.received:after, .sent:after {
+	content: '';
+	border-right: 12px solid #dddddd;
+	border-top: 18px solid transparent;
+	border-radius: 20px;
+	height: 38px;
+	width: 50px;
+	position: absolute;
+	bottom: 1px;
+}
+.received:after {
+	left: -38px;
+}
+.sent:after {
+	border-right: 0px;
+	border-left: 12px solid #007AFF;
+	border-top: 18px solid transparent;
+	position: absolute;
+	right: -38px;
+}
+
+img, video {
+	max-width: 100%;
+	margin: 0 0 10px 0;
+	border-radius: 12px;
+}
+
+img:active {
+	position: fixed;
+	left: 50%;
+	top: 0px;
+	transform: translateX(-50%);
+	border-radius: 0px;
+	z-index: 1;
+	max-height: 100vh;
+	overflow: hidden;
+}
