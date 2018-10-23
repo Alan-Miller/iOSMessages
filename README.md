@@ -1,13 +1,13 @@
 iOSMessageExport
 ================
 
-### Notes
+### Introduction
+> This project reads an iOS backup folder and outputs a folder of HTML files for all Messages conversations. It is an update of [Chelsey Baker's original repo](https://github.com/chelseybaker/iOSMessageExport). Nearly all of the code, and much of this readme, comes from her. Here are some changes I made:
+1. It forks from another project fork to add an edit to a file path to account for a small change Apple made to the folder structure.
+1. It edits the date logic. All dates were appearing as 20001231. I suspect the date logic might be different for different computers. Mine is an Apple Macbook.
+1. It adds styles to mimic iOS styles so conversations appear as they to on iPhones.
 
-* Files are overwritten without checking to see if one already exists.
-* If you get an error about the DateTime module, see this CPAN article on installing modules: http://www.cpan.org/modules/INSTALL.html
-* If you're getting a `file is encrypted or is not a database` error, make sure you have disabled the "Encrypt iPhone backup" checkbox under the "Backup" settings panel in iTunes.
-
-### Basic steps: 
+### Basic steps
 
 1. Make an iOSBackup directory on the Desktop
     ```
@@ -32,6 +32,12 @@ iOSMessageExport
     ```
     
 
-> After finishing these steps, an `_export` folder with all your files will be created in the iOSBackup folder.
+### Result
+After finishing these steps, an `_export` folder with all your files will be created in the iOSBackup folder.
 
-> My thanks to [Chelsey Baker](https://github.com/chelseybaker) for [her original repo](https://github.com/chelseybaker/iOSMessageExport).
+### Other notes
+
+* Files are overwritten without checking to see if one already exists.
+* If you get an error about the DateTime module, see this CPAN article on installing modules: http://www.cpan.org/modules/INSTALL.html
+* If you're getting a `file is encrypted or is not a database` error, make sure you have disabled the "Encrypt iPhone backup" checkbox under the "Backup" settings panel in iTunes.
+
