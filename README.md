@@ -9,7 +9,7 @@ iOSMessageExport
 
 ### Basic steps
 
-1. Make an iOSBackup directory on the Desktop
+1. Make an iOSBackup directory on the Desktop.
     ```
     mkdir ~/Desktop/iOSBackup
     ```
