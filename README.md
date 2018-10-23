@@ -2,10 +2,10 @@ iOSMessageExport
 ================
 
 ### Introduction
-> This project reads an iOS backup folder and outputs a folder of HTML files for all Messages conversations. It is an update of [Chelsey Baker's original repo](https://github.com/chelseybaker/iOSMessageExport). Nearly all of the code, and much of this readme, comes from her. Here are some changes I made:
-1. It forks from another project fork to add an edit to a file path to account for a small change Apple made to the folder structure.
-1. It edits the date logic. All dates were appearing as 20001231. I suspect the date logic might be different for different computers. Mine is an Apple Macbook.
-1. It adds styles to mimic iOS styles so conversations appear as they to on iPhones.
+> This project reads an iOS backup folder and outputs a folder of HTML files for all Messages conversations, making it easy to read these files in a browser. It is an update of [Chelsey Baker's project](https://github.com/chelseybaker/iOSMessageExport). Nearly all of the code, and much of this readme, comes from her repo. Here are some changes I made:
+1. It adds an edit to a file path to account for a small change Apple made to the folder structure.
+1. It edits the date logic. All dates were appearing as 20001231. I suspect the necessary date logic might be different for different computers. Mine is an Apple Macbook.
+1. It adds CSS styles to mimic iOS styles, so conversations appear as they do on iPhones.
 
 ### Basic steps
 
